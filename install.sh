@@ -19,11 +19,81 @@ docker-compose down -v 2>/dev/null
 
 rm -rf config bootnode node* docker-compose.yaml
 
+
+
+# Ask the user for the default configuration
+default=""
+advanced=""
+chainId=2222
+blockperiodseconds=2
+num_nodes=4
+besuVersion="latest"
+ip="172.16.240"
+while [[ $default != "y" && $default != "n" ]]; do
+  read -p "Do you want to -- CHANGE THE DEFAULT -- configuration (latest Besu version, 4 nodes, IP 172.16.240.0, chainId 2222, 2 sec between blocks)? Please enter 'y' or 'n': " default
+  if [[ $default != "y" && $default != "n" ]]; then
+    echo "Please enter 'y' or 'n'."
+  fi
+done
+jq --argjson chainId "$chainId" '.genesis.config.chainId = $chainId' qbftConfigFile.json >temp.json && mv temp.json qbftConfigFile.json
+jq --argjson blockperiodseconds "$blockperiodseconds" '.genesis.config.qbft.blockperiodseconds = $blockperiodseconds' qbftConfigFile.json >temp.json && mv temp.json qbftConfigFile.json
+
+if [[ $default == "y" ]]; then
+  chainId=0
+  blockperiodseconds=0
+  num_nodes=0
+  besuVersion=""
+  while [[ $num_nodes -lt 4 || $num_nodes -gt 100 ]]; do
+    read -p "Enter the number of nodes (including the bootnode, minimum 4): " num_nodes
+    if [[ $num_nodes -lt 4 || $num_nodes -gt 100 ]]; then
+      echo "You must create at least 4 nodes and maximum 100. Please try again."
+    fi
+  done
+  while [[ $chainId -lt 1 ]]; do
+    read -p "Enter the chain ID (e.g. 1234): " chainId
+    if [[ $chainId -lt 1 ]]; then
+      echo "You must enter a valid chain ID. Please try again."
+    fi
+  done
+  jq --argjson chainId "$chainId" '.genesis.config.chainId = $chainId' qbftConfigFile.json >temp.json && mv temp.json qbftConfigFile.json
+  while [[ $blockperiodseconds -lt 1 || $blockperiodseconds -gt 30 ]]; do
+    read -p "Enter the block period in seconds (between 2 - 30): " blockperiodseconds
+    if [[ $blockperiodseconds -lt 2 || $blockperiodseconds -gt 30 ]]; then
+      echo "You must enter a block period in seconds within the interval. Please try again."
+    fi
+  done
+  jq --argjson blockperiodseconds "$blockperiodseconds" '.genesis.config.qbft.blockperiodseconds = $blockperiodseconds' qbftConfigFile.json >temp.json && mv temp.json qbftConfigFile.json
+  while [[ ! $besuVersion =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]+$ ]]; do
+    read -p "Enter the version of Besu (format: 24.12.2): " besuVersion
+    if [[ ! $besuVersion =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]+$ ]]; then
+      echo "Invalid version format. Please use format like 24.12.2"
+    fi
+  done
+
+  while [[ $advanced != "y" && $advanced != "n" ]]; do
+    read -p "Do you want to CHANGE THE ADVANCE CONFIGURATION (IP direction)? Please enter 'y' or 'n': " advanced
+    if [[ $advanced != "y" && $advanced != "n" ]]; then
+      echo "Please enter 'y' or 'n'."
+    fi
+  done
+
+  if [[ $advanced == "y" ]]; then
+    ip=""
+    while [[ $ip == "" ]]; do
+      read -p "Enter the IP address mask (first 3 numbers, e.g. 172.16.240): " ip
+      if [[ ! $ip =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        echo "You must enter a valid IP address mask. Please try again."
+        ip=""
+      fi
+    done
+  fi
+fi
+
 # Function to generate keys using Besu in Docker
 generate_keys() {
   node_dir=$1
   echo "Generating keys for $node_dir..."
-  docker run --rm -v $PWD/config:/opt/besu/config -v $PWD/$node_dir/data:/opt/besu/data hyperledger/besu:24.6.0 operator generate-blockchain-config --config-file=/opt/besu/config/qbftConfigFile.json --to=/opt/besu/data --private-key-file-name=key
+  docker run --rm -v $PWD/config:/opt/besu/config -v $PWD/$node_dir/data:/opt/besu/data hyperledger/besu:$besuVersion operator generate-blockchain-config --config-file=/opt/besu/config/qbftConfigFile.json --to=/opt/besu/data --private-key-file-name=key
 
   first_folder=$(ls $PWD/$node_dir/data/keys | head -n 1)
   if [ -d "$PWD/$node_dir/data/keys/$first_folder" ]; then
@@ -46,66 +116,6 @@ generate_keys() {
     exit 1
   fi
 }
-
-# Ask the user for the default configuration
-default=""
-advanced=""
-chainId=2222
-blockperiodseconds=2
-num_nodes=4
-ip="172.16.240"
-while [[ $default != "y" && $default != "n" ]]; do
-  read -p "Do you want to CHANGE THE DEFAULT configuration (4 nodes, 172.16.240.0, chainId 2222, 2 sec between blocks)? Please enter 'y' or 'n': " default
-  if [[ $default != "y" && $default != "n" ]]; then
-    echo "Please enter 'y' or 'n'."
-  fi
-done
-jq --argjson chainId "$chainId" '.genesis.config.chainId = $chainId' qbftConfigFile.json >temp.json && mv temp.json qbftConfigFile.json
-jq --argjson blockperiodseconds "$blockperiodseconds" '.genesis.config.qbft.blockperiodseconds = $blockperiodseconds' qbftConfigFile.json >temp.json && mv temp.json qbftConfigFile.json
-
-if [[ $default == "y" ]]; then
-  chainId=0
-  blockperiodseconds=0
-  num_nodes=0
-  while [[ $num_nodes -lt 4 || $num_nodes -gt 100 ]]; do
-    read -p "Enter the number of nodes (including the bootnode, minimum 4): " num_nodes
-    if [[ $num_nodes -lt 4 || $num_nodes -gt 100 ]]; then
-      echo "You must create at least 4 nodes and maximum 100. Please try again."
-    fi
-  done
-  while [[ $chainId -lt 1 ]]; do
-    read -p "Enter the chain ID (e.g. 1234): " chainId
-    if [[ $chainId -lt 1 ]]; then
-      echo "You must enter a valid chain ID. Please try again."
-    fi
-  done
-  jq --argjson chainId "$chainId" '.genesis.config.chainId = $chainId' qbftConfigFile.json >temp.json && mv temp.json qbftConfigFile.json
-  while [[ $blockperiodseconds -lt 1 || $blockperiodseconds -gt 30 ]]; do
-    read -p "Enter the block period in seconds (between 2 - 30): " blockperiodseconds
-    if [[ $blockperiodseconds -lt 2 || $blockperiodseconds -gt 30 ]]; then
-      echo "You must enter a block period in seconds within the interval. Please try again."
-    fi
-  done
-  jq --argjson blockperiodseconds "$blockperiodseconds" '.genesis.config.qbft.blockperiodseconds = $blockperiodseconds' qbftConfigFile.json >temp.json && mv temp.json qbftConfigFile.json
-
-  while [[ $advanced != "y" && $advanced != "n" ]]; do
-    read -p "Do you want to CHANGE THE ADVANCE configuration (IP direction)? Please enter 'y' or 'n': " advanced
-    if [[ $advanced != "y" && $advanced != "n" ]]; then
-      echo "Please enter 'y' or 'n'."
-    fi
-  done
-
-  if [[ $advanced == "y" ]]; then
-    ip=""
-    while [[ $ip == "" ]]; do
-      read -p "Enter the IP address mask (first 3 numbers, e.g. 172.16.240): " ip
-      if [[ ! $ip =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        echo "You must enter a valid IP address mask. Please try again."
-        ip=""
-      fi
-    done
-  fi
-fi
 
 # Create a directory for config if it doesn't exist
 echo "Setting up configuration..."
@@ -144,7 +154,7 @@ for ((i = 1; i <= num_nodes; i++)); do
     cat >>docker-compose.yaml <<EOF
   $node_dir:
     container_name: $node_dir
-    image: hyperledger/besu:24.6.0
+    image: hyperledger/besu:$besuVersion
     entrypoint:
       - /bin/bash
       - -c
@@ -172,7 +182,7 @@ EOF
     cat >>docker-compose.yaml <<EOF
   $node_dir:
     container_name: $node_dir
-    image: hyperledger/besu:24.6.0
+    image: hyperledger/besu:$besuVersion
     entrypoint:
       - /bin/bash
       - -c
