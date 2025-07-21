@@ -1,0 +1,6 @@
+
+docker-compose.yaml
+.DS_Store
+bootnode/
+config/
+node*/

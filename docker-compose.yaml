@@ -10,12 +10,12 @@ networks:
 services:
   bootnode:
     container_name: bootnode
-    image: hyperledger/besu:latest
+    image: hyperledger/besu:24.6.0
     entrypoint:
       - /bin/bash
       - -c
       - |
-        /opt/besu/bin/besu --data-path=/opt/besu/data         --genesis-file=/opt/besu/genesis.json --rpc-http-enabled         --host-allowlist="*" --rpc-http-cors-origins="all"         --rpc-http-api=ETH,NET,QBFT;
+        /opt/besu/bin/besu --data-path=/opt/besu/data         --genesis-file=/opt/besu/genesis.json --rpc-http-enabled         --host-allowlist="*" --rpc-http-cors-origins="all"         --tx-pool=sequenced         --tx-pool-limit-by-account-percentage=1         --poa-block-txs-selection-max-time=100         --rpc-http-api=ADMIN,DEBUG,WEB3,ETH,TXPOOL,CLIQUE,MINER,NET; 
     volumes:
       - ./config/bootnode_id:/opt/besu/config/bootnode_id
       - ./config/genesis.json:/opt/besu/genesis.json
@@ -28,13 +28,13 @@ services:
         ipv4_address: 172.16.240.30
   node1:
     container_name: node1
-    image: hyperledger/besu:latest
+    image: hyperledger/besu:24.6.0
     entrypoint:
       - /bin/bash
       - -c
       - |
-        sleep 20;
-        /opt/besu/bin/besu --data-path=/opt/besu/data         --genesis-file=/opt/besu/genesis.json --rpc-http-enabled         --bootnodes=enode://$(cat /opt/besu/config/bootnode_id)@172.16.240.30:30303 --p2p-port=30303         --host-allowlist="*" --rpc-http-cors-origins="all"
+        sleep 2;
+        /opt/besu/bin/besu --data-path=/opt/besu/data         --genesis-file=/opt/besu/genesis.json --rpc-http-enabled         --bootnodes=enode://$(cat /opt/besu/config/bootnode_id)@172.16.240.30:30303 --p2p-port=30303         --host-allowlist="*" --rpc-http-cors-origins="all"         --poa-block-txs-selection-max-time=100         --tx-pool-limit-by-account-percentage=1         --tx-pool=sequenced 
     volumes:
       - ./config/bootnode_id:/opt/besu/config/bootnode_id
       - ./config/genesis.json:/opt/besu/genesis.json
@@ -46,13 +46,13 @@ services:
         ipv4_address: 172.16.240.31
   node2:
     container_name: node2
-    image: hyperledger/besu:latest
+    image: hyperledger/besu:24.6.0
     entrypoint:
       - /bin/bash
       - -c
       - |
-        sleep 30;
-        /opt/besu/bin/besu --data-path=/opt/besu/data         --genesis-file=/opt/besu/genesis.json --rpc-http-enabled         --bootnodes=enode://$(cat /opt/besu/config/bootnode_id)@172.16.240.30:30303 --p2p-port=30303         --host-allowlist="*" --rpc-http-cors-origins="all"
+        sleep 3;
+        /opt/besu/bin/besu --data-path=/opt/besu/data         --genesis-file=/opt/besu/genesis.json --rpc-http-enabled         --bootnodes=enode://$(cat /opt/besu/config/bootnode_id)@172.16.240.30:30303 --p2p-port=30303         --host-allowlist="*" --rpc-http-cors-origins="all"         --poa-block-txs-selection-max-time=100         --tx-pool-limit-by-account-percentage=1         --tx-pool=sequenced 
     volumes:
       - ./config/bootnode_id:/opt/besu/config/bootnode_id
       - ./config/genesis.json:/opt/besu/genesis.json
@@ -64,13 +64,13 @@ services:
         ipv4_address: 172.16.240.32
   node3:
     container_name: node3
-    image: hyperledger/besu:latest
+    image: hyperledger/besu:24.6.0
     entrypoint:
       - /bin/bash
       - -c
       - |
-        sleep 40;
-        /opt/besu/bin/besu --data-path=/opt/besu/data         --genesis-file=/opt/besu/genesis.json --rpc-http-enabled         --bootnodes=enode://$(cat /opt/besu/config/bootnode_id)@172.16.240.30:30303 --p2p-port=30303         --host-allowlist="*" --rpc-http-cors-origins="all"
+        sleep 4;
+        /opt/besu/bin/besu --data-path=/opt/besu/data         --genesis-file=/opt/besu/genesis.json --rpc-http-enabled         --bootnodes=enode://$(cat /opt/besu/config/bootnode_id)@172.16.240.30:30303 --p2p-port=30303         --host-allowlist="*" --rpc-http-cors-origins="all"         --poa-block-txs-selection-max-time=100         --tx-pool-limit-by-account-percentage=1         --tx-pool=sequenced 
     volumes:
       - ./config/bootnode_id:/opt/besu/config/bootnode_id
       - ./config/genesis.json:/opt/besu/genesis.json
@@ -80,57 +80,3 @@ services:
     networks:
       besu-network:
         ipv4_address: 172.16.240.33
-  node4:
-    container_name: node4
-    image: hyperledger/besu:latest
-    entrypoint:
-      - /bin/bash
-      - -c
-      - |
-        sleep 50;
-        /opt/besu/bin/besu --data-path=/opt/besu/data         --genesis-file=/opt/besu/genesis.json --rpc-http-enabled         --bootnodes=enode://$(cat /opt/besu/config/bootnode_id)@172.16.240.30:30303 --p2p-port=30303         --host-allowlist="*" --rpc-http-cors-origins="all"
-    volumes:
-      - ./config/bootnode_id:/opt/besu/config/bootnode_id
-      - ./config/genesis.json:/opt/besu/genesis.json
-      - ./node4/data:/opt/besu/data
-    depends_on:
-      - bootnode
-    networks:
-      besu-network:
-        ipv4_address: 172.16.240.34
-  node5:
-    container_name: node5
-    image: hyperledger/besu:latest
-    entrypoint:
-      - /bin/bash
-      - -c
-      - |
-        sleep 60;
-        /opt/besu/bin/besu --data-path=/opt/besu/data         --genesis-file=/opt/besu/genesis.json --rpc-http-enabled         --bootnodes=enode://$(cat /opt/besu/config/bootnode_id)@172.16.240.30:30303 --p2p-port=30303         --host-allowlist="*" --rpc-http-cors-origins="all"
-    volumes:
-      - ./config/bootnode_id:/opt/besu/config/bootnode_id
-      - ./config/genesis.json:/opt/besu/genesis.json
-      - ./node5/data:/opt/besu/data
-    depends_on:
-      - bootnode
-    networks:
-      besu-network:
-        ipv4_address: 172.16.240.35
-  node6:
-    container_name: node6
-    image: hyperledger/besu:latest
-    entrypoint:
-      - /bin/bash
-      - -c
-      - |
-        sleep 70;
-        /opt/besu/bin/besu --data-path=/opt/besu/data         --genesis-file=/opt/besu/genesis.json --rpc-http-enabled         --bootnodes=enode://$(cat /opt/besu/config/bootnode_id)@172.16.240.30:30303 --p2p-port=30303         --host-allowlist="*" --rpc-http-cors-origins="all"
-    volumes:
-      - ./config/bootnode_id:/opt/besu/config/bootnode_id
-      - ./config/genesis.json:/opt/besu/genesis.json
-      - ./node6/data:/opt/besu/data
-    depends_on:
-      - bootnode
-    networks:
-      besu-network:
-        ipv4_address: 172.16.240.36
