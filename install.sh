@@ -164,6 +164,7 @@ for ((i = 1; i <= num_nodes; i++)); do
         --host-allowlist="*" --rpc-http-cors-origins="all" \
         --tx-pool=sequenced \
         --tx-pool-limit-by-account-percentage=1 \
+        --min-gas-price=0 \
         --poa-block-txs-selection-max-time=100 \
         --rpc-http-api=ADMIN,DEBUG,WEB3,ETH,TXPOOL,CLIQUE,MINER,NET; 
     volumes:
@@ -194,6 +195,7 @@ EOF
         --host-allowlist="*" --rpc-http-cors-origins="all" \
         --poa-block-txs-selection-max-time=100 \
         --tx-pool-limit-by-account-percentage=1 \
+        --min-gas-price=0 \
         --tx-pool=sequenced 
     volumes:
       - ./config/bootnode_id:/opt/besu/config/bootnode_id
