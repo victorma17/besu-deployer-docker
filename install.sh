@@ -30,7 +30,7 @@ num_nodes=4
 besuVersion="latest"
 ip="172.16.240"
 while [[ $default != "y" && $default != "n" ]]; do
-  read -p "Do you want to -- CHANGE THE DEFAULT -- configuration (latest Besu version, 4 nodes, IP 172.16.240.0, chainId 2222, 2 sec between blocks)? Please enter 'y' or 'n': " default
+  read -p "Do you want to -- CHANGE THE DEFAULT CONFIGURATION ? -- (latest Besu version, 4 nodes, IP 172.16.240.0, chainId 2222, 2 sec between blocks) Please enter 'y' or 'n': " default
   if [[ $default != "y" && $default != "n" ]]; then
     echo "Please enter 'y' or 'n'."
   fi

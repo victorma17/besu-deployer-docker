@@ -1,4 +1,4 @@
-# Besu deployer automatized and Iterative 🙌🏻
+# Automatized Besu Deployer and Parameterizable 🙌🏻
 
 ### Pre-Requisites
 
@@ -7,11 +7,17 @@
 🟡 Docker running 
 
 
-First of all we gonna run the install shell script of configuration 🙋🏻‍♂️
+All that is needed is run the install shell script of configuration (Take a quick look before) 🙋🏻‍♂️
 
 ```sh
 sh install.sh      
 ```
+
+DONE 😎
+
+### Customize more configuration
+
+If you want to change the Genesis, you must to replace in 
 
 ### Extra
 
