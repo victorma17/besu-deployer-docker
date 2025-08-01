@@ -27,10 +27,10 @@ advanced=""
 chainId=2222
 blockperiodseconds=2
 num_nodes=4
-besuVersion="latest"
+besuVersion="24.12.2"
 ip="172.16.240"
 while [[ $default != "y" && $default != "n" ]]; do
-  read -p "Do you want to -- CHANGE THE DEFAULT CONFIGURATION ? -- (latest Besu version, 4 nodes, IP 172.16.240.0, chainId 2222, 2 sec between blocks) Please enter 'y' or 'n': " default
+  read -p "Do you want to -- CHANGE THE DEFAULT CONFIGURATION ? -- (24.12.2 Besu version, 4 nodes, IP 172.16.240.0, chainId 2222, 2 sec between blocks) Please enter 'y' or 'n': " default
   if [[ $default != "y" && $default != "n" ]]; then
     echo "Please enter 'y' or 'n'."
   fi
@@ -109,6 +109,10 @@ generate_keys() {
       # Copy the genesis.json from the bootnode to a common location
       cp $PWD/$node_dir/data/genesis.json $PWD/config/
       echo "Removing genesis.json from $node_dir and moving to config folder"
+      # copy the  config.toml from pwd to config folder
+      cp config.toml config/
+      echo "Removing config.toml from $node_dir and moving to config folder"
+
     fi
     rm -rf $PWD/$node_dir/data/genesis.json
   else
@@ -164,6 +168,9 @@ for ((i = 1; i <= num_nodes; i++)); do
         --host-allowlist="*" --rpc-http-cors-origins="all" \
         --tx-pool=sequenced \
         --tx-pool-limit-by-account-percentage=1 \
+        --Xdns-enabled=true \
+        --Xdns-update-enabled=true \
+        --Xnat-kube-service-name=besu-node-validator-1 \
         --min-gas-price=0 \
         --poa-block-txs-selection-max-time=100 \
         --rpc-http-api=ADMIN,DEBUG,WEB3,ETH,TXPOOL,CLIQUE,MINER,NET; 
@@ -190,16 +197,14 @@ EOF
       - |
         sleep $((i * 1));
         /opt/besu/bin/besu --data-path=/opt/besu/data \
-        --genesis-file=/opt/besu/genesis.json --rpc-http-enabled \
-        --bootnodes=enode://\$(cat /opt/besu/config/bootnode_id)@$ip.30:30303 --p2p-port=30303 \
-        --host-allowlist="*" --rpc-http-cors-origins="all" \
-        --poa-block-txs-selection-max-time=100 \
-        --tx-pool-limit-by-account-percentage=1 \
-        --min-gas-price=0 \
-        --tx-pool=sequenced 
+        --genesis-file=/opt/besu/genesis.json \
+        --config-file=/opt/besu/config/config.toml \
+        --bootnodes=enode://\$(cat /opt/besu/config/bootnode_id)@$ip.30:30303
+ 
     volumes:
       - ./config/bootnode_id:/opt/besu/config/bootnode_id
       - ./config/genesis.json:/opt/besu/genesis.json
+      - ./config/config.toml:/opt/besu/config/config.toml
       - ./$node_dir/data:/opt/besu/data
     depends_on:
       - bootnode
