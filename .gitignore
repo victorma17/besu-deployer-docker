@@ -5,3 +5,4 @@ bootnode/
 config/
 node*/
 QBFT-Network/
+config/genesis.json
