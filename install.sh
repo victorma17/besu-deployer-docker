@@ -5,21 +5,14 @@ if ! command -v docker &>/dev/null; then
   echo "Docker could not be found. Please install Docker and try again."
   exit 1
 fi
-
 if ! docker info &>/dev/null; then
   echo "Docker is not running. Please start Docker and try again."
   exit 1
 fi
-
 echo "Docker is installed and running."
-
 echo "Cleaning up previous setup folders..."
-
 docker-compose down -v 2>/dev/null
-
-rm -rf config bootnode node* docker-compose.yaml
-
-
+# rm -rf config bootnode node* docker-compose.yaml
 
 # Ask the user for the default configuration
 default=""
@@ -30,13 +23,13 @@ num_nodes=4
 besuVersion="24.12.2"
 ip="172.16.240"
 while [[ $default != "y" && $default != "n" ]]; do
-  read -p "Do you want to -- CHANGE THE DEFAULT CONFIGURATION ? -- (24.12.2 Besu version, 4 nodes, IP 172.16.240.0, chainId 2222, 2 sec between blocks) Please enter 'y' or 'n': " default
+  read -p "Do you want to -- CHANGE THE DEFAULT --  (24.12.2 Besu version, 4 nodes, IP 172.16.240.0, chainId 2222, 2 sec between blocks)? Please enter 'y' or 'n': " default
   if [[ $default != "y" && $default != "n" ]]; then
     echo "Please enter 'y' or 'n'."
   fi
 done
-jq --argjson chainId "$chainId" '.genesis.config.chainId = $chainId' qbftConfigFile.json >temp.json && mv temp.json qbftConfigFile.json
-jq --argjson blockperiodseconds "$blockperiodseconds" '.genesis.config.qbft.blockperiodseconds = $blockperiodseconds' qbftConfigFile.json >temp.json && mv temp.json qbftConfigFile.json
+jq --argjson chainId "$chainId" '.genesis.config.chainId = $chainId' ./config/qbftConfigFile.json >temp.json && mv temp.json ./config/qbftConfigFile.json
+jq --argjson blockperiodseconds "$blockperiodseconds" '.genesis.config.qbft.blockperiodseconds = $blockperiodseconds' ./config/qbftConfigFile.json >temp.json && mv temp.json ./config/qbftConfigFile.json
 
 if [[ $default == "y" ]]; then
   chainId=0
@@ -55,14 +48,14 @@ if [[ $default == "y" ]]; then
       echo "You must enter a valid chain ID. Please try again."
     fi
   done
-  jq --argjson chainId "$chainId" '.genesis.config.chainId = $chainId' qbftConfigFile.json >temp.json && mv temp.json qbftConfigFile.json
+  jq --argjson chainId "$chainId" '.genesis.config.chainId = $chainId' ./config/qbftConfigFile.json >temp.json && mv temp.json ./config/qbftConfigFile.json
   while [[ $blockperiodseconds -lt 1 || $blockperiodseconds -gt 30 ]]; do
     read -p "Enter the block period in seconds (between 2 - 30): " blockperiodseconds
     if [[ $blockperiodseconds -lt 2 || $blockperiodseconds -gt 30 ]]; then
       echo "You must enter a block period in seconds within the interval. Please try again."
     fi
   done
-  jq --argjson blockperiodseconds "$blockperiodseconds" '.genesis.config.qbft.blockperiodseconds = $blockperiodseconds' qbftConfigFile.json >temp.json && mv temp.json qbftConfigFile.json
+  jq --argjson blockperiodseconds "$blockperiodseconds" '.genesis.config.qbft.blockperiodseconds = $blockperiodseconds' ./config/qbftConfigFile.json >temp.json && mv temp.json ./config/qbftConfigFile.json
   while [[ ! $besuVersion =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]+$ ]]; do
     read -p "Enter the version of Besu (format: 24.12.2): " besuVersion
     if [[ ! $besuVersion =~ ^[0-9]{2}\.[0-9]{2}\.[0-9]+$ ]]; then
@@ -89,134 +82,49 @@ if [[ $default == "y" ]]; then
   fi
 fi
 
-# Function to generate keys using Besu in Docker
-generate_keys() {
-  node_dir=$1
-  echo "Generating keys for $node_dir..."
-  docker run --rm -v $PWD/config:/opt/besu/config -v $PWD/$node_dir/data:/opt/besu/data hyperledger/besu:$besuVersion operator generate-blockchain-config --config-file=/opt/besu/config/qbftConfigFile.json --to=/opt/besu/data --private-key-file-name=key
 
-  first_folder=$(ls $PWD/$node_dir/data/keys | head -n 1)
-  if [ -d "$PWD/$node_dir/data/keys/$first_folder" ]; then
-    mv $PWD/$node_dir/data/keys/$first_folder/* $PWD/$node_dir/data
-    rm -r $PWD/$node_dir/data/keys
-    echo "Keys generated for $node_dir."
-
-    if [[ $node_dir == "bootnode" ]]; then
-      # Extract the node ID from the public key by removing '0x' prefix
-      node_id=$(cat $PWD/$node_dir/data/key.pub | sed 's/^0x//')
-      echo "Node ID for $node_dir: $node_id"
-      echo $node_id >$PWD/config/bootnode_id
-      # Copy the genesis.json from the bootnode to a common location
-      cp $PWD/$node_dir/data/genesis.json $PWD/config/
-      echo "Removing genesis.json from $node_dir and moving to config folder"
-      # copy the  config.toml from pwd to config folder
-      cp config.toml config/
-      echo "Removing config.toml from $node_dir and moving to config folder"
-
-    fi
-    rm -rf $PWD/$node_dir/data/genesis.json
-  else
-    echo "Error: Key generation for $node_dir failed."
-    exit 1
-  fi
-}
-
-# Create a directory for config if it doesn't exist
-echo "Setting up configuration..."
-mkdir -p config
-cp qbftConfigFile.json config/
-echo "Configuration setup complete."
-
-# Initial docker-compose.yaml content
-cat >docker-compose.yaml <<EOF
-version: "3.4"
-
-networks:
-  besu-network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: $ip.0/24
-
-services:
-EOF
-
-# Loop to setup each node
-echo "Setting up nodes..."
-for ((i = 1; i <= num_nodes; i++)); do
-  if [[ $i -eq 1 ]]; then
-    node_dir="bootnode"
-  else
-    node_dir="node$((i - 1))"
-  fi
-
-  mkdir -p $node_dir/data
-  generate_keys $node_dir
-
-  if [[ $node_dir == "bootnode" ]]; then
-    # Bootnode configuration
-    cat >>docker-compose.yaml <<EOF
-  $node_dir:
-    container_name: $node_dir
-    image: hyperledger/besu:$besuVersion
-    entrypoint:
-      - /bin/bash
-      - -c
-      - |
-        /opt/besu/bin/besu --data-path=/opt/besu/data \
-        --genesis-file=/opt/besu/genesis.json --rpc-http-enabled \
-        --host-allowlist="*" --rpc-http-cors-origins="all" \
-        --tx-pool=sequenced \
-        --tx-pool-limit-by-account-percentage=1 \
-        --Xdns-enabled=true \
-        --Xdns-update-enabled=true \
-        --Xnat-kube-service-name=besu-node-validator-1 \
-        --min-gas-price=0 \
-        --poa-block-txs-selection-max-time=100 \
-        --rpc-http-api=ADMIN,DEBUG,WEB3,ETH,TXPOOL,CLIQUE,MINER,NET; 
-    volumes:
-      - ./config/bootnode_id:/opt/besu/config/bootnode_id
-      - ./config/genesis.json:/opt/besu/genesis.json
-      - ./$node_dir/data:/opt/besu/data
-    ports:
-      - 30303:30303
-      - 8545:8545
-    networks:
-      besu-network:
-        ipv4_address: $ip.30
-EOF
-  else
-    # Other nodes configuration
-    cat >>docker-compose.yaml <<EOF
-  $node_dir:
-    container_name: $node_dir
-    image: hyperledger/besu:$besuVersion
-    entrypoint:
-      - /bin/bash
-      - -c
-      - |
-        sleep $((i * 1));
-        /opt/besu/bin/besu --data-path=/opt/besu/data \
-        --genesis-file=/opt/besu/genesis.json \
-        --config-file=/opt/besu/config/config.toml \
-        --bootnodes=enode://\$(cat /opt/besu/config/bootnode_id)@$ip.30:30303
- 
-    volumes:
-      - ./config/bootnode_id:/opt/besu/config/bootnode_id
-      - ./config/genesis.json:/opt/besu/genesis.json
-      - ./config/config.toml:/opt/besu/config/config.toml
-      - ./$node_dir/data:/opt/besu/data
-    depends_on:
-      - bootnode
-    networks:
-      besu-network:
-        ipv4_address: $ip.$((30 + i - 1))
-EOF
-  fi
-  echo "Node $node_dir setup complete."
+mkdir -p QBFT-Network
+for i in {1..4}; do
+  mkdir -p "QBFT-Network/Node-$i/data"
 done
 
-echo "Setup Complete. Configuration files created."
 
-# Start the network
-docker-compose up
+cd QBFT-Network
+
+
+# Function to generate keys using Besu in Docker
+besu operator generate-blockchain-config --config-file=../config/qbftConfigFile.json --to=networkFiles --private-key-file-name=key
+
+cp networkFiles/genesis.json ../config/genesis.json
+
+sh ../moveKeys.sh 
+
+docker network inspect besu-network >/dev/null 2>&1 || docker network create --driver=bridge --subnet=172.16.240.0/24 besu-network
+
+
+# Create a directory for config if it doesn't exist
+# docker network create --driver=bridge --subnet=172.16.240.0/24 besu-network
+
+cd ..
+
+docker run -d --name bootnode \
+  -v "$(pwd)/config:/opt/besu/config" \
+  -v "$(pwd)/QBFT-Network/Node-1/data:/opt/besu/data" \
+  -p 30303:30303 \
+  -p 8545:8545 \
+  -p 9545:9545 \
+  --network besu-network \
+  --ip 172.16.240.30 \
+  hyperledger/besu:24.12.2 \
+  --config-file=/opt/besu/config/configBootnode.toml
+
+sleep 5
+
+# Get the enode from the bootnode
+sh getEnode.sh 172.16.240.30
+
+# create nodes 
+sh createValidatorNodes.sh
+
+
+echo "Setup Complete. Configuration files created."

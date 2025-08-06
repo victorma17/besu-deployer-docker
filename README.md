@@ -66,3 +66,7 @@ docker-compose up
 docker-compose down
 ```
 
+If you want to see which validators contains the extradata field in genesis.json, set that fiel in a extradata.txt in your PWD ( just the 0x...)
+```sh
+besu rlp decode --from=extradata.txt --type=QBFT_EXTRA_DATA
+```
