@@ -117,7 +117,19 @@ done
 cd QBFT-Network
 
 # Generate genesis and validator keys using Besu
-besu operator generate-blockchain-config --config-file=../config/qbftConfigFile.json --to=networkFiles --private-key-file-name=key
+# besu operator generate-blockchain-config 
+# --config-file=../config/qbftConfigFile.json 
+# --to=networkFiles 
+# --private-key-file-name=key
+docker run --rm \
+  -v "$(pwd)/../config:/opt/besu/config" \
+  -v "$(pwd):/opt/besu/output" \
+  hyperledger/besu:$besuVersion \
+  operator generate-blockchain-config \
+  --config-file=/opt/besu/config/qbftConfigFile.json \
+  --to=/opt/besu/output/networkFiles \
+  --private-key-file-name=key 2>/dev/null
+
 
 # Copy the generated genesis to the config folder
 cp networkFiles/genesis.json ../config/genesis.json

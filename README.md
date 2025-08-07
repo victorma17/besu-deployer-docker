@@ -1,4 +1,4 @@
-# Automatized Besu Deployer and Parameterizable 🙌🏻
+# Automatized Besu Docker Deployer and Parameterizable 🙌🏻
 
 ### Pre-Requisites
 
@@ -17,7 +17,7 @@ DONE 😎
 
 For stop the network and clean the installation just run:
 ```sh
-sh stop.sh      
+sh clean.sh      
 ```
 
 ### Customize more configuration
