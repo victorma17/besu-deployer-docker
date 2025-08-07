@@ -27,7 +27,7 @@ ip="172.16.240"
 
 # Ask user if they want to change the default configuration
 while [[ $default != "y" && $default != "n" ]]; do
-  read -p "Do you want to -- CHANGE THE DEFAULT --  (24.12.2 Besu version, 4 nodes, IP 172.16.240.0, chainId 2222, 2 sec between blocks)? Please enter 'y' or 'n': " default
+  read -p "Do you want to -- CHANGE THE DEFAULT CONFIGURATION --  (24.12.2 Besu version, 4 nodes, IP 172.16.240.0, chainId 2222, 2 sec between blocks)? Please enter 'y' or 'n': " default
   if [[ $default != "y" && $default != "n" ]]; then
     echo "Please enter 'y' or 'n'."
   fi
@@ -137,7 +137,7 @@ docker run --rm \
 cp networkFiles/genesis.json ../config/genesis.json
 
 # Move the generated validator keys to each node's data folder
-sh ../moveKeys.sh 
+bash ../moveKeys.sh 
 
 # Create the custom Docker network if not already created
 docker network inspect besu-network >/dev/null 2>&1 || docker network create --driver=bridge --subnet=172.16.240.0/24 besu-network
@@ -162,10 +162,10 @@ echo "Waiting for the bootnode to start some seconds ..."
 sleep 7
 
 # Fetch the bootnode enode and insert it into the validator config
-sh getEnode.sh 172.16.240.30
+bash getEnode.sh 172.16.240.30
 
 # Launch all validator node containers
-sh createValidatorNodes.sh $besuVersion $num_nodes
+bash createValidatorNodes.sh $besuVersion $num_nodes
 
 # Finish
 echo "Setup Complete. Besu network starting! 🚀"
