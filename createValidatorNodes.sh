@@ -29,6 +29,7 @@ for i in $(seq 2 $NUM_VALIDATORS); do
     -p $P2P_PORT:$P2P_PORT \
     -p $RPC_PORT:$RPC_PORT \
     -p $METRICS_PORT:$METRICS_PORT \
+    --label project=besu \
     --network $NETWORK_NAME \
     --ip $NODE_IP \
     hyperledger/besu:$BESU_VERSION \

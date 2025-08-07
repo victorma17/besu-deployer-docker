@@ -88,9 +88,7 @@ for i in {1..4}; do
   mkdir -p "QBFT-Network/Node-$i/data"
 done
 
-
 cd QBFT-Network
-
 
 # Function to generate keys using Besu in Docker
 besu operator generate-blockchain-config --config-file=../config/qbftConfigFile.json --to=networkFiles --private-key-file-name=key
@@ -101,10 +99,6 @@ sh ../moveKeys.sh
 
 docker network inspect besu-network >/dev/null 2>&1 || docker network create --driver=bridge --subnet=172.16.240.0/24 besu-network
 
-
-# Create a directory for config if it doesn't exist
-# docker network create --driver=bridge --subnet=172.16.240.0/24 besu-network
-
 cd ..
 
 docker run -d --name bootnode \
@@ -113,12 +107,13 @@ docker run -d --name bootnode \
   -p 30303:30303 \
   -p 8545:8545 \
   -p 9545:9545 \
+  --label project=besu \
   --network besu-network \
   --ip 172.16.240.30 \
   hyperledger/besu:24.12.2 \
   --config-file=/opt/besu/config/configBootnode.toml
 
-sleep 5
+sleep 7
 
 # Get the enode from the bootnode
 sh getEnode.sh 172.16.240.30
@@ -126,5 +121,4 @@ sh getEnode.sh 172.16.240.30
 # create nodes 
 sh createValidatorNodes.sh
 
-
-echo "Setup Complete. Configuration files created."
+echo "Setup Complete. Besu network starting! 🚀"
