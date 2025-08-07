@@ -7,13 +7,18 @@
 🟡 Docker running 
 
 
-All that is needed is run the install shell script of configuration (Take a quick look before) 🙋🏻‍♂️
+All that is needed is run the install shell script of configuration (Take a quick look before if you want to) 🙋🏻‍♂️
 
 ```sh
 sh install.sh      
 ```
 
 DONE 😎
+
+For stop the network and clean the installation just run:
+```sh
+sh stop.sh      
+```
 
 ### Customize more configuration
 
@@ -58,12 +63,6 @@ sh clean.sh
 ```sh
 docker container prune
 docker network prune
-```
-
-To start / stop the containers manually
-```sh
-docker-compose up
-docker-compose down
 ```
 
 If you want to see which validators contains the extradata field in genesis.json, set that fiel in a extradata.txt in your PWD ( just the 0x...)
