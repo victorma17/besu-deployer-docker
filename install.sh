@@ -38,8 +38,12 @@ if [[ $default == "y" ]]; then
   besuVersion=""
   while [[ $num_nodes -lt 4 || $num_nodes -gt 100 ]]; do
     read -p "Enter the number of nodes (including the bootnode, minimum 4): " num_nodes
-    if [[ $num_nodes -lt 4 || $num_nodes -gt 100 ]]; then
-      echo "You must create at least 4 nodes and maximum 100. Please try again."
+    # Quitar espacios y asegurarse que es un número entero
+  #  num_nodes=$(echo "$input" | tr -d '[:space:]')
+  # Validar que sea un número entero mayor o igual a 4 y menor o igual a 100
+  if [[ "$num_nodes" =~ ^[0-9]+$ ]] && (( num_nodes >= 4 && num_nodes <= 100 )); then
+    break
+  elseecho "You must create at least 4 nodes and maximum 100. Please try again."
     fi
   done
   while [[ $chainId -lt 1 ]]; do
@@ -84,7 +88,7 @@ fi
 
 
 mkdir -p QBFT-Network
-for i in {1..4}; do
+for ((i = 1; i <= num_nodes; i++)); do
   mkdir -p "QBFT-Network/Node-$i/data"
 done
 
@@ -110,15 +114,16 @@ docker run -d --name bootnode \
   --label project=besu \
   --network besu-network \
   --ip 172.16.240.30 \
-  hyperledger/besu:24.12.2 \
+  hyperledger/besu:$besuVersion \
   --config-file=/opt/besu/config/configBootnode.toml
 
+echo "Waiting for the bootnode to start some seconds ..."
 sleep 7
 
 # Get the enode from the bootnode
 sh getEnode.sh 172.16.240.30
 
 # create nodes 
-sh createValidatorNodes.sh
+sh createValidatorNodes.sh $besuVersion $num_nodes
 
 echo "Setup Complete. Besu network starting! 🚀"

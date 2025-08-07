@@ -1,16 +1,16 @@
 #!/bin/bash
 
-NUM_VALIDATORS=4  # Total number of validator nodes
+NUM_VALIDATORS=$2  # Total number of validator nodes
 BASE_IP="172.16.240"
 NETWORK_NAME="besu-network"
-BESU_VERSION="24.12.2"
+BESU_VERSION=$1
 
 # Create Docker network if it does not exist
 docker network inspect $NETWORK_NAME >/dev/null 2>&1 || \
 docker network create --driver=bridge --subnet=$BASE_IP.0/24 $NETWORK_NAME
 
 # Loop through validator nodes
-for i in $(seq 2 $NUM_VALIDATORS); do
+for ((i = 2; i <= NUM_VALIDATORS; i++)); do
   NODE_NAME="node$i"
   NODE_DIR="QBFT-Network/Node-$i/data"
   mkdir -p "$NODE_DIR"
