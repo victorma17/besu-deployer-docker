@@ -9,7 +9,7 @@ BESU_VERSION=$1
 docker network inspect $NETWORK_NAME >/dev/null 2>&1 || \
 docker network create --driver=bridge --subnet=$BASE_IP.0/24 $NETWORK_NAME
 
-# Loop through validator nodes
+# Loop through validator nodes 
 for ((i = 2; i <= NUM_VALIDATORS; i++)); do
   NODE_NAME="node$i"
   NODE_DIR="QBFT-Network/Node-$i/data"

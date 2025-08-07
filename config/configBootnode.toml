@@ -21,3 +21,4 @@ rpc-http-port=8545
 
 host-allowlist=["*"]
 metrics-port=9545
+

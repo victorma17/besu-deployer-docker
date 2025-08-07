@@ -14,7 +14,6 @@ echo "Docker is installed and running."
 # Clean up previous setup and containers
 echo "Cleaning up previous setup folders..."
 docker-compose down -v 2>/dev/null
-# rm -rf config bootnode node* docker-compose.yaml
 
 # Default configuration parameters
 default=""

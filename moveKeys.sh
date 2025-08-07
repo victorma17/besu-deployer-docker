@@ -6,7 +6,6 @@ NODO_BASE="Node"
 
 # Node counter (starting in 1 → Node-1)
 i=1
-
 # sort the directories in KEYS_DIR and iterate through them
 for address_dir in $(ls "$KEYS_DIR" | sort); do
   src="$KEYS_DIR/$address_dir"

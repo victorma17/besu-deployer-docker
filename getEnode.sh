@@ -37,6 +37,5 @@ else
 fi
 
 mv "$TMP_FILE" "$CONFIG_FILE"
-
 echo "configValidators.toml updated with:"
 echo "  $ENODE_WITH_IP"
