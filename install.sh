@@ -110,8 +110,10 @@ fi
 
 # Create directory structure for validator nodes
 mkdir -p QBFT-Network
-for ((i = 1; i <= num_nodes; i++)); do
+i=1
+while [ "$i" -le "$num_nodes" ]; do
   mkdir -p "QBFT-Network/Node-$i/data"
+  i=`expr $i + 1`
 done
 
 cd QBFT-Network

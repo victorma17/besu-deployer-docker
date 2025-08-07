@@ -11,7 +11,7 @@
     "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "config": {
-      "chainId": 2222,
+      "chainId": 3336,
       "contractSizeLimit": 24576,
       "homesteadBlock": 0,
       "eip150Block": 0,
@@ -27,7 +27,7 @@
       "londonBlock": 0,
       "zeroBaseFee": true,
       "qbft": {
-        "blockperiodseconds": 2,
+        "blockperiodseconds": 3,
         "epochlength": 1000,
         "requesttimeoutseconds": 2
       }
@@ -56,7 +56,7 @@
   "blockchain": {
     "nodes": {
       "generate": true,
-      "count": 4
+      "count": 6
     }
   }
 }
