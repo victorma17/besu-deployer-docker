@@ -7,7 +7,9 @@ This tool is developed for Linux terminal, if you are running this in Windows un
 ### Pre-Requisites
 
 🟡 Docker and Docker-compose installed 
+
 🟡 jq installed ($ brew install jq)
+
 🟡 Docker running 
 
 
