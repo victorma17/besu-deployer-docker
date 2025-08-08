@@ -28,10 +28,6 @@ To stop the network and clean the installation just run:
 bash clean.sh      
 ```
 
-### Customize more configuration
-
-If you want to change the Genesis, you must replace in 
-
 ### Extra
 
 🟡 First if you want access to the geth console you need to install first:
@@ -59,7 +55,7 @@ Also calls directly through curl like:
 curl -X POST --data '{"jsonrpc":"2.0",curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getBalance","params":["0x<YourAccountAddress>", "latest"],"id":1}' http://0.0.0.0:8545
 ```
  
-### 👀 Troubleshooting 👀
+## 👀 Troubleshooting 👀
 
 1. Try to clean all your old files first
 
