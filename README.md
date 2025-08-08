@@ -13,6 +13,8 @@ This tool is developed for Linux terminal, if you are running this in Windows un
 🟡 Docker running 
 
 
+### DEPLOYMENT
+
 To deploy and make it work, simply run the installation script (you may review it beforehand if you wish): 🙋🏻‍♂️
 
 ```bash
