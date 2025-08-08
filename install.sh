@@ -26,7 +26,7 @@ ip="172.16.240"
 
 # Ask user if they want to change the default configuration
 while [[ $default != "y" && $default != "n" ]]; do
-  read -p "Do you want to -- CHANGE THE DEFAULT CONFIGURATION --  (24.12.2 Besu version, 4 nodes, IP 172.16.240.0, chainId 2222, 2 sec between blocks)? Please enter 'y' or 'n': " default
+  read -p "Do you want to -- CHANGE THE DEFAULT CONFIGURATION --  (24.12.2 Besu version, 4 nodes, IP 172.16.240.0, chainId 2222, 2 sec between blocks) Please enter 'y' or 'n': " default
   if [[ $default != "y" && $default != "n" ]]; then
     echo "Please enter 'y' or 'n'."
   fi
@@ -118,10 +118,6 @@ done
 cd QBFT-Network
 
 # Generate genesis and validator keys using Besu
-# besu operator generate-blockchain-config 
-# --config-file=../config/qbftConfigFile.json 
-# --to=networkFiles 
-# --private-key-file-name=key
 docker run --rm \
   -v "$(pwd)/../config:/opt/besu/config" \
   -v "$(pwd):/opt/besu/output" \

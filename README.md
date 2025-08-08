@@ -1,13 +1,17 @@
 # Automatized Besu Docker Deployer and Parameterizable 🙌🏻
 
+This project provides an automated, Docker-based deployment of a Hyperledger Besu QBFT network, allowing you to quickly spin up a configurable private blockchain without installing Besu locally. All configuration parameters—such as number of validators, Besu version, chain ID, block time, and network IP—can be set interactively or left at defaults, making it easy for both beginners and advanced users to deploy, test, and manage a Besu network entirely in Docker.
+
+This tool is developed for Linux terminal, if you are running this in Windows under WSL, you will need to execute a cleaner tool that make scripts compatible first ($ dos2unix * config/*)
+
 ### Pre-Requisites
 
 🟡 Docker and Docker-compose installed 
-
+🟡 jq installed ($ brew install jq)
 🟡 Docker running 
 
 
-All that is needed is run the install shell script of configuration (Take a quick look before if you want to) 🙋🏻‍♂️
+To deploy and make it work, simply run the installation script (you may review it beforehand if you wish): 🙋🏻‍♂️
 
 ```bash
 bash install.sh      
@@ -15,14 +19,14 @@ bash install.sh
 
 DONE 😎
 
-For stop the network and clean the installation just run:
+To stop the network and clean the installation just run:
 ```bash
 bash clean.sh      
 ```
 
 ### Customize more configuration
 
-If you want to change the Genesis, you must to replace in 
+If you want to change the Genesis, you must replace in 
 
 ### Extra
 
@@ -51,21 +55,21 @@ Also calls directly through curl like:
 curl -X POST --data '{"jsonrpc":"2.0",curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getBalance","params":["0x<YourAccountAddress>", "latest"],"id":1}' http://0.0.0.0:8545
 ```
  
-### Troubleshooting
+### 👀 Troubleshooting 👀
 
-👀 1. Try to clean all your old files first
+1. Try to clean all your old files first
 
 ```bash
 bash clean.sh      
 ```
 
-👀 2. If you have some conflict with containers that are alredy under us, you can exec: (will drop any stopped container ⚠️)
+2. If you have some conflict with containers that are already under us, you can exec: (will drop any stopped container ⚠️)
 ```bash
 docker container prune
 docker network prune
 ```
 
-If you want to see which validators contains the extradata field in genesis.json, set that fiel in a extradata.txt in your PWD ( just the 0x...)
+3. If you want to see which validators contains the extradata field in genesis.json, set that fiel in a extradata.txt in your PWD (just the 0x in your file)
 ```bash
-besu rlp decode --from=extradata.txt --type=QBFT_EXTRA_DATA
+docker run --rm -v "$(pwd):/opt/besu/data" hyperledger/besu:24.12.2 rlp decode --from=/opt/besu/data/extradata.txt --type=QBFT_EXTRA_DATA
 ```
